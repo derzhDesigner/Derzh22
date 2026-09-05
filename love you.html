@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Untuk Kamu ❤️</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #000;
+      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Background Love Matrix */
+    #matrixCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    /* Overlay Quiz */
+    .quiz-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      transition: opacity 1s ease, visibility 1s ease;
+    }
+
+    .quiz-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 30px 25px;
+      text-align: center;
+      max-width: 420px;
+      width: 90%;
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+    }
+
+    .quiz-card h2 {
+      font-size: 1.6rem;
+      color: #fff;
+      margin-bottom: 25px;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .quiz-btn {
+      padding: 12px 20px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 25px;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-adek {
+      background: linear-gradient(45deg, #8e9eab, #eef2f3);
+      color: #222;
+      box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-pacar {
+      background: linear-gradient(45deg, #ff0054, #ff4d6d);
+      box-shadow: 0 4px 15px rgba(255, 0, 84, 0.4);
+    }
+
+    .btn-teman {
+      background: linear-gradient(45deg, #ffb703, #fb8500);
+      box-shadow: 0 4px 15px rgba(255, 183, 3, 0.4);
+    }
+
+    .quiz-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+    }
+
+    .quiz-feedback {
+      margin-top: 15px;
+      font-size: 0.95rem;
+      color: #fff;
+      min-height: 24px;
+    }
+
+    /* Container Utama */
+    .container {
+      position: relative;
+      width: 100%;
+      max-width: 650px;
+      height: 95vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 1.5s ease 0.5s;
+    }
+
+    .container.show {
+      opacity: 1;
+    }
+
+    .name-input-container input {
+      padding: 8px 18px;
+      font-size: 1rem;
+      border: 1px solid var(--theme-color);
+      border-radius: 25px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      outline: none;
+      text-align: center;
+      box-shadow: 0 0 15px var(--theme-color);
+    }
+
+    .message-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-align: center;
+      color: var(--theme-color);
+      text-shadow: 0 0 15px var(--theme-color);
+      margin-top: 5px;
+      opacity: 0;
+      line-height: 1.4;
+      padding: 0 10px;
+    }
+
+    .message-title.animate {
+      animation: fadeIn 2s 7s forwards;
+    }
+
+    /* Area Bunga & Kucing */
+    .flower-area {
+      position: relative;
+      width: 360px;
+      height: 480px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+    }
+
+    .soil {
+      position: absolute;
+      bottom: 5px;
+      width: 180px;
+      height: 22px;
+      background: radial-gradient(ellipse at center, #3d2314 0%, #170d07 80%, transparent 100%);
+      border-radius: 50%;
+      box-shadow: 0 0 15px rgba(61, 35, 20, 0.8);
+    }
+
+    /* Kucing Animasi */
+    .cat-container {
+      position: absolute;
+      bottom: 12px;
+      right: 35px;
+      width: 65px;
+      height: 60px;
+      z-index: 20;
+      opacity: 0;
+    }
+
+    .cat-container.animate {
+      animation: fadeIn 1.5s 7.5s forwards;
+    }
+
+    .cat-body {
+      position: absolute;
+      bottom: 0;
+      width: 45px;
+      height: 35px;
+      background: #f8edeb;
+      border-radius: 25px 25px 10px 10px;
+    }
+
+    .cat-head {
+      position: absolute;
+      bottom: 22px;
+      left: 5px;
+      width: 38px;
+      height: 32px;
+      background: #f8edeb;
+      border-radius: 50%;
+    }
+
+    .cat-ear {
+      position: absolute;
+      top: -6px;
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 10px solid #f8edeb;
+    }
+
+    .cat-ear.left { left: 4px; transform: rotate(-15deg); }
+    .cat-ear.right { right: 4px; transform: rotate(15deg); }
+
+    .cat-eye {
+      position: absolute;
+      top: 12px;
+      width: 5px;
+      height: 5px;
+      background: #333;
+      border-radius: 50%;
+      animation: blinkCat 4s infinite;
+    }
+
+    .cat-eye.left { left: 8px; }
+    .cat-eye.right { right: 8px; }
+
+    @keyframes blinkCat {
+      0%, 90%, 100% { transform: scaleY(1); }
+      95% { transform: scaleY(0.1); }
+    }
+
+    .cat-blush {
+      position: absolute;
+      top: 16px;
+      width: 6px;
+      height: 3px;
+      background: #ffb3c1;
+      border-radius: 50%;
+    }
+    .cat-blush.left { left: 5px; }
+    .cat-blush.right { right: 5px; }
+
+    .cat-tail {
+      position: absolute;
+      bottom: 5px;
+      right: -10px;
+      width: 25px;
+      height: 6px;
+      background: #f8edeb;
+      border-radius: 10px;
+      transform-origin: left center;
+      animation: wagTail 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes wagTail {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(-30deg); }
+    }
+
+    .cat-heart {
+      position: absolute;
+      top: -15px;
+      left: 12px;
+      font-size: 12px;
+      animation: floatCatHeart 1.8s infinite ease-in-out;
+    }
+
+    @keyframes floatCatHeart {
+      0% { transform: translateY(0) scale(0.8); opacity: 0; }
+      50% { opacity: 1; }
+      100% { transform: translateY(-10px) scale(1.1); opacity: 0; }
+    }
+
+    /* Batang Utama & Cabang */
+    .stem-main {
+      position: absolute;
+      bottom: 15px;
+      width: 7px;
+      height: 0px;
+      background: linear-gradient(to right, #133011, #2d5a27, #133011);
+      border-radius: 4px;
+    }
+
+    .stem-main.animate { animation: growMainStem 2.5s 1.5s forwards ease-in-out; }
+
+    @keyframes growMainStem {
+      0% { height: 0px; }
+      100% { height: 180px; }
+    }
+
+    .branch {
+      position: absolute;
+      width: 5px;
+      height: 0px;
+      background: linear-gradient(to right, #133011, #2d5a27, #133011);
+      border-radius: 3px;
+      transform-origin: bottom center;
+    }
+
+    .branch.left.animate {
+      bottom: 110px;
+      left: 176px;
+      transform: rotate(-35deg);
+      animation: growBranchLeft 2s 3.5s forwards ease-in-out;
+    }
+
+    .branch.right.animate {
+      bottom: 130px;
+      right: 176px;
+      transform: rotate(35deg);
+      animation: growBranchRight 2s 3.8s forwards ease-in-out;
+    }
+
+    .branch.center.animate {
+      bottom: 190px;
+      height: 0;
+      animation: growBranchCenter 1.5s 4s forwards ease-in-out;
+    }
+
+    @keyframes growBranchLeft { 100% { height: 90px; } }
+    @keyframes growBranchRight { 100% { height: 90px; } }
+    @keyframes growBranchCenter { 100% { height: 60px; } }
+
+    /* Kepala Mawar */
+    .rose-group {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      transform: scale(0.1);
+    }
+
+    .rose-group.center { bottom: 240px; }
+    .rose-group.left { bottom: 170px; left: 105px; transform-origin: center; }
+    .rose-group.right { bottom: 190px; right: 105px; transform-origin: center; }
+
+    .rose-group.center.animate { animation: bloom 2s 5s forwards cubic-bezier(0.25, 1, 0.5, 1); }
+    .rose-group.left.animate { animation: bloom 2s 5.3s forwards cubic-bezier(0.25, 1, 0.5, 1); }
+    .rose-group.right.animate { animation: bloom 2s 5.6s forwards cubic-bezier(0.25, 1, 0.5, 1); }
+
+    @keyframes bloom {
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* Kelopak Mawar Dynamic */
+    .petal {
+      position: absolute;
+      border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%;
+      box-shadow: inset 0 -6px 10px rgba(0, 0, 0, 0.6), 0 3px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .petal.core {
+      width: 20px;
+      height: 28px;
+      background: var(--rose-core);
+      z-index: 10;
+      border-radius: 50%;
+    }
+
+    .petal.inner {
+      width: 38px;
+      height: 48px;
+      background: var(--rose-inner);
+      z-index: 8;
+    }
+
+    .petal.i1 { transform: rotate(0deg) translateY(-6px); }
+    .petal.i2 { transform: rotate(72deg) translateY(-6px); }
+    .petal.i3 { transform: rotate(144deg) translateY(-6px); }
+    .petal.i4 { transform: rotate(216deg) translateY(-6px); }
+    .petal.i5 { transform: rotate(288deg) translateY(-6px); }
+
+    .petal.outer {
+      width: 75px;
+      height: 80px;
+      background: var(--rose-outer);
+      z-index: 3;
+    }
+
+    .petal.o1 { transform: rotate(18deg) translateY(-10px); }
+    .petal.o2 { transform: rotate(90deg) translateY(-10px); }
+    .petal.o3 { transform: rotate(162deg) translateY(-10px); }
+    .petal.o4 { transform: rotate(234deg) translateY(-10px); }
+    .petal.o5 { transform: rotate(306deg) translateY(-10px); }
+
+    /* Default Theme (Pacar - Red) */
+    :root {
+      --theme-color: #ff4d6d;
+      --rose-core: radial-gradient(circle at top, #ff0040, #500014);
+      --rose-inner: radial-gradient(circle at 50% 30%, #ff1a53 0%, #a30029 70%, #4a0012 100%);
+      --rose-outer: radial-gradient(circle at 50% 20%, #ff4d79 0%, #c70039 55%, #400011 100%);
+    }
+
+    /* Theme Adek (White & Soft Pink) */
+    body.theme-adek {
+      --theme-color: #ffffff;
+      --rose-core: radial-gradient(circle at top, #ffffff, #a3a3a3);
+      --rose-inner: radial-gradient(circle at 50% 30%, #ffffff 0%, #e0e0e0 70%, #888888 100%);
+      --rose-outer: radial-gradient(circle at 50% 20%, #f0f0f0 0%, #cccccc 55%, #666666 100%);
+    }
+
+    /* Theme Teman (Yellow Gold) */
+    body.theme-teman {
+      --theme-color: #ffcc00;
+      --rose-core: radial-gradient(circle at top, #ffea00, #735700);
+      --rose-inner: radial-gradient(circle at 50% 30%, #ffd000 0%, #b38f00 70%, #524100 100%);
+      --rose-outer: radial-gradient(circle at 50% 20%, #ffdd00 0%, #cc9900 55%, #473600 100%);
+    }
+
+    @keyframes fadeIn { to { opacity: 1; } }
+  </style>
+</head>
+<body>
+
+<!-- Background Love Matrix Rain -->
+<canvas id="matrixCanvas"></canvas>
+
+<!-- Overlay Pertanyaan -->
+<div class="quiz-overlay" id="quizOverlay">
+  <div class="quiz-card">
+    <h2>Kamu itu siapanya aku sih? ✨</h2>
+    <div class="btn-group">
+      <button class="quiz-btn btn-adek" onclick="selectRole('adek')">Adek Terbaik 🤍</button>
+      <button class="quiz-btn btn-pacar" onclick="selectRole('pacar')">Pacar Kesayangan ❤️</button>
+      <button class="quiz-btn btn-teman" onclick="selectRole('teman')">Teman Sejati 💛</button>
+    </div>
+    <div class="quiz-feedback" id="quizFeedback"></div>
+  </div>
+</div>
+
+<!-- Container Utama Mawar -->
+<div class="container" id="mainContainer">
+  <div class="name-input-container">
+    <input type="text" id="nameInput" value="Sayang❤️" oninput="updateName()">
+  </div>
+
+  <h1 class="message-title" id="messageTitle">
+    <span id="customText"></span><br>
+    <strong id="displayName">Sayang❤️</strong>
+  </h1>
+
+  <!-- Area Bunga Cabang 3 & Kucing -->
+  <div class="flower-area">
+    <div class="soil"></div>
+
+    <div class="stem-main" id="stemMain"></div>
+    <div class="branch left" id="branchL"></div>
+    <div class="branch right" id="branchR"></div>
+    <div class="branch center" id="branchC"></div>
+
+    <!-- Mawar Cabang Kiri -->
+    <div class="rose-group left" id="roseL">
+      <div class="petal core"></div>
+      <div class="petal inner i1"></div><div class="petal inner i2"></div><div class="petal inner i3"></div><div class="petal inner i4"></div><div class="petal inner i5"></div>
+      <div class="petal outer o1"></div><div class="petal outer o2"></div><div class="petal outer o3"></div><div class="petal outer o4"></div><div class="petal outer o5"></div>
+    </div>
+
+    <!-- Mawar Cabang Tengah -->
+    <div class="rose-group center" id="roseC">
+      <div class="petal core"></div>
+      <div class="petal inner i1"></div><div class="petal inner i2"></div><div class="petal inner i3"></div><div class="petal inner i4"></div><div class="petal inner i5"></div>
+      <div class="petal outer o1"></div><div class="petal outer o2"></div><div class="petal outer o3"></div><div class="petal outer o4"></div><div class="petal outer o5"></div>
+    </div>
+
+    <!-- Mawar Cabang Kanan -->
+    <div class="rose-group right" id="roseR">
+      <div class="petal core"></div>
+      <div class="petal inner i1"></div><div class="petal inner i2"></div><div class="petal inner i3"></div><div class="petal inner i4"></div><div class="petal inner i5"></div>
+      <div class="petal outer o1"></div><div class="petal outer o2"></div><div class="petal outer o3"></div><div class="petal outer o4"></div><div class="petal outer o5"></div>
+    </div>
+
+    <!-- Animasi Kucing -->
+    <div class="cat-container" id="cat">
+      <div class="cat-heart" id="catHeart">💖</div>
+      <div class="cat-head">
+        <div class="cat-ear left"></div>
+        <div class="cat-ear right"></div>
+        <div class="cat-eye left"></div>
+        <div class="cat-eye right"></div>
+        <div class="cat-blush left"></div>
+        <div class="cat-blush right"></div>
+      </div>
+      <div class="cat-body"></div>
+      <div class="cat-tail"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  /* 1. Dynamic Matrix Rain Effect */
+  const canvas = document.getElementById('matrixCanvas');
+  const ctx = canvas.getContext('2d');
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  let matrixColor = '#ff4d6d'; // Default Merah
+  let matrixChars = ['❤️', '💖', '✨', '🌹'];
+
+  const fontSize = 16;
+  const columns = Math.floor(window.innerWidth / fontSize);
+  const drops = Array(columns).fill(1);
+
+  function drawMatrix() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = matrixColor;
+    ctx.font = fontSize + 'px sans-serif';
+
+    for (let i = 0; i < drops.length; i++) {
+      const text = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+      drops[i]++;
+    }
+  }
+  setInterval(drawMatrix, 45);
+
+  /* 2. Pilihan Jawaban & Teks Kata-Kata Keren */
+  function selectRole(role) {
+    const feedback = document.getElementById('quizFeedback');
+    const nameInput = document.getElementById('nameInput');
+    const customText = document.getElementById('customText');
+    const catHeart = document.getElementById('catHeart');
+
+    if (role === 'adek') {
+      document.body.classList.add('theme-adek');
+      matrixColor = '#ffffff'; // Love Putih Hujan
+      matrixChars = ['🤍', '✨', '❄️', '🌸', '🤍'];
+      catHeart.innerText = '🤍';
+
+      feedback.innerText = "Terima kasih sudah jadi adek terbaik! 🤍";
+      nameInput.value = "Adek Terbaik 👧✨";
+      customText.innerText = "Tumbuhlah makin hebat & selalu bahagia ya,";
+
+    } else if (role === 'pacar') {
+      matrixColor = '#ff4d6d'; // Love Merah Hujan
+      matrixChars = ['❤️', '💖', '💕', '🌹', '✨'];
+      catHeart.innerText = '💖';
+
+      feedback.innerText = "Kamu selalu jadi alasan tersenyumku ❤️";
+      nameInput.value = "Pacar Kesayangan ❤️";
+      customText.innerText = "Mawar ini mekar indah, tapi tidak seindah senyummu,";
+
+    } else if (role === 'teman') {
+      document.body.classList.add('theme-teman');
+      matrixColor = '#ffcc00'; // Love Kuning Hujan
+      matrixChars = ['💛', '⭐', '✨', '🌟', '🤝'];
+      catHeart.innerText = '💛';
+
+      feedback.innerText = "Sahabat sejati yang selalu ada! 💛";
+      nameInput.value = "Teman Sejati 🤝🌟";
+      customText.innerText = "Terima kasih selalu jadi kawan terbaik dalam tiap cerita,";
+    }
+
+    updateName();
+
+    setTimeout(() => {
+      const overlay = document.getElementById('quizOverlay');
+      overlay.style.opacity = '0';
+      overlay.style.visibility = 'hidden';
+      startAnimations();
+    }, 1200);
+  }
+
+  /* 3. Jalankan Animasi */
+  function startAnimations() {
+    document.getElementById('mainContainer').classList.add('show');
+
+    const elements = [
+      'stemMain', 'branchL', 'branchR', 'branchC',
+      'roseL', 'roseC', 'roseR', 'cat', 'messageTitle'
+    ];
+
+    elements.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('animate');
+    });
+  }
+
+  /* 4. Dynamic Name Update */
+  function updateName() {
+    const inputVal = document.getElementById('nameInput').value;
+    document.getElementById('displayName').innerText = inputVal.trim() !== "" ? inputVal : "Kamu✨";
+  }
+</script>
+</body>
+</html>
